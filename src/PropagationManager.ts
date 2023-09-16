@@ -75,7 +75,7 @@ export class PropagationManager {
         let keys = Object.keys(this.propagations);
         let satArr = Array(keys.length)
         for (let i = 0; i < keys.length; i++) {
-            satArr[i] = new Sat(keys[i], keys[i], "test desc", this)
+            satArr[i] = new Sat(keys[i], keys[i], "test desc", i, this)
         }
         return satArr;
     }

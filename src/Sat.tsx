@@ -13,13 +13,15 @@ export class Sat {
     propagationManagerKey : string;
     description : string;
     title : string;
+    id : number;
     shape : THREE.Mesh;
 
-    constructor(key : string, title : string, description : string, propMan : PropagationManager) {
+    constructor(key : string, title : string, description : string, id: number, propMan : PropagationManager) {
         this.propagationManager = propMan;
         this.propagationManagerKey = key;
         this.description = description;
         this.title = title;
+        this.id = id;
         this.shape = this.makeShape();
     }
 
@@ -28,7 +30,9 @@ export class Sat {
     }
 
     makeShape = () => {
-        return new THREE.Mesh(new THREE.SphereGeometry(RENDER_SIZE, 8, 8), new THREE.MeshBasicMaterial({ color: UNSELECTED_COLOR }));
+        let shape = new THREE.Mesh(new THREE.SphereGeometry(RENDER_SIZE, 8, 8), new THREE.MeshBasicMaterial({ color: UNSELECTED_COLOR }));
+        shape.name = String(this.id);
+        return shape;
     }
 
     // returns object with azimuth, elev, range
