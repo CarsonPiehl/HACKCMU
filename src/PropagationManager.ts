@@ -8,6 +8,8 @@ type dict<T> = {
     [key : string] : T;
 } 
 
+let starlinkDesc = "Starlink is a satellite internet constellation operated by American aerospace company SpaceX, providing coverage to over 60 countries. It also aims for global mobile phone service after 2023. SpaceX started launching Starlink satellites in 2019. As of August 2023, Starlink consists of over 5,000 mass-produced small satellites in low Earth orbit (LEO), which communicate with designated ground transceivers. In total, nearly 12,000 satellites are planned to be deployed, with a possible later extension to 42,000. SpaceX announced reaching more than 1 million subscribers in December 2022 and 1.5 million subscribers in May 2023. Starlink has had a key role in the Russo-Ukrainian War."
+
 type satDisplayInfo = {
     "Revolutions per Day" : string
     "Orbit Regime" : string
@@ -109,6 +111,8 @@ export class PropagationManager {
         for (let [key, value] of Object.entries(satrecs)) {
             let prop = Satellite.propagate(satrecs[key], new Date()).position;
             if (typeof prop != "boolean") propagations[key] = prop;
+            //@ts-ignore
+            if (key.includes("STARLINK")) descriptions[key] = starlinkDesc; 
             //@ts-ignore
             infos[key] = this.makeInfo(value.no, descriptions[key]);
         }
