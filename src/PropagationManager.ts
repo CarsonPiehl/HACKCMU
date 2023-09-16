@@ -2,6 +2,7 @@ import axios from 'axios';
 import * as Satellite from 'satellite.js';
 import { Sat } from './Sat';
 import { TLEs } from './celestrakTLEs';
+import { descriptions } from './descriptions';
 
 type dict<T> = {
     [key : string] : T;
@@ -18,8 +19,11 @@ function constructInfoString(info : satDisplayInfo) {
     let str = ""
     for (let key of Object.keys(info)) {
         //@ts-ignore
-        str += key + ": " + info[key];
-        str += "\n"
+        if (info[key]) {
+            //@ts-ignore
+            str += key + ": " + info[key];
+            str += "\n"
+        }
     }
     return str;
 }
@@ -38,6 +42,7 @@ export class PropagationManager {
         height: 0.370
     };
     url: string
+    descriptions : dict<string> = {} 
     infos : dict<satDisplayInfo> = {};
     satrecs : dict<Satellite.SatRec> = {}
     propagations : dict<Satellite.EciVec3<number>> = {}
@@ -53,35 +58,35 @@ export class PropagationManager {
         this.old_timestamp = 0
     }
 
-    makeInfo (meanMotion : number ) {
+    makeInfo (meanMotion : number, desc : string ) {
         let meanMotionRevPerDay = Math.floor((meanMotion * 24 * 60 / (Math.PI * 2)) * 100) / 100;
 
         if (11 < meanMotionRevPerDay) {
             return {
                 "Revolutions per Day": String(meanMotionRevPerDay),
                 "Orbit Regime": "Low Earth Orbit",
-                "Description" : "test description"
+                "Description" : desc
             }
         }
         if (1.1 < meanMotionRevPerDay) {
             return {
                 "Revolutions per Day": String(meanMotionRevPerDay),
                 "Orbit Regime": "Medium Earth Orbit",
-                "Description" : "test description"
+                "Description" : desc
             }
         }
         if (.9 < meanMotionRevPerDay) {
             return {
                 "Revolutions per Day": String(meanMotionRevPerDay),
                 "Orbit Regime": "Geosynchronous Orbit",
-                "Description" : "test description"
+                "Description" : desc
             }
         }
         else {
             return {
                 "Revolutions per Day": String(meanMotionRevPerDay),
                 "Orbit Regime": "High Earth Orbit",
-                "Description" : "test description"
+                "Description" : desc
             }
         }
     }
@@ -104,7 +109,8 @@ export class PropagationManager {
         for (let [key, value] of Object.entries(satrecs)) {
             let prop = Satellite.propagate(satrecs[key], new Date()).position;
             if (typeof prop != "boolean") propagations[key] = prop;
-            infos[key] = this.makeInfo(value.no);
+            //@ts-ignore
+            infos[key] = this.makeInfo(value.no, descriptions[key]);
         }
 
         this.satrecs = satrecs
@@ -127,6 +133,8 @@ export class PropagationManager {
                 this.parse(data);
             })
         }
+        this.descriptions = descriptions
+        
     }
 
     
