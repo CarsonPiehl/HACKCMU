@@ -2,7 +2,6 @@ import { useState } from "react"
 
 export function Introbox() {
     let [open, setOpen] = useState(true)
-    let height = 500;
     let width  = 500;
 
     return (

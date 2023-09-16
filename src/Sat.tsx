@@ -3,7 +3,7 @@ import * as Satellite from 'satellite.js';
 import * as THREE from 'three';
 
 const DISTANCE_FROM_OBSERVER = 100;
-const RENDER_SIZE = .25
+const RENDER_SIZE = .5
 const UNSELECTED_COLOR = 0xF0D168;
 const SELECTED_COLOR = 0x00FF00;
 

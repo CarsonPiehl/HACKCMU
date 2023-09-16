@@ -1,9 +1,7 @@
-import React, { Component } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { Infobox, InfoboxProps } from './Components/Infobox.tsx'
-import Three from './Three.tsx'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
