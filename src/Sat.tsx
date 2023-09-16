@@ -75,4 +75,9 @@ export class Sat {
         this.shape.material.color.set(SELECTED_COLOR);
     }
 
+    unselectShape () {
+        //@ts-ignore
+        this.shape.material.color.set(UNSELECTED_COLOR);
+    }
+
 }
