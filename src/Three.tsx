@@ -2,6 +2,8 @@ import {useState} from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { DragControls } from 'three/examples/jsm/controls/DragControls.js';
+import { PropagationManager } from './PropagationManager';
+import { Infobox, InfoboxProps } from './Components/Infobox';
 
 function randomColor () {
     return new THREE.Color(Math.random(), Math.random(), Math.random());
@@ -33,7 +35,7 @@ function generateRandomLandmarks(xBounds : Array<number>, yBounds : Array<number
     return meshArr;
 }
 
-export default function Three() {
+export default function Three(props : any) {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
@@ -45,11 +47,20 @@ export default function Three() {
         pointer.y = -((event.clientY / window.innerHeight) * 2) + 1
     }
     
+    let propagationManager = new PropagationManager("");
+    propagationManager.getData();
+    let sats = propagationManager.constructSats();
+    sats.forEach(sat => scene.add(sat.shape));
+    propagationManager.updatePropagations();
+    sats.forEach(sat => sat.updateShapePosition());
+
 
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.innerHTML = "";
-    document.body.appendChild( renderer.domElement );
+    //@ts-ignore
+    document.getElementById('three').innerHTML = "";
+    //@ts-ignore
+    document.getElementById('three').appendChild( renderer.domElement );
 
 
 
@@ -64,22 +75,18 @@ export default function Three() {
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enablePan = false;
 
-    let meshes = generateRandomLandmarks([-20, 20], [0, 20], [-20, 20], 30, scene);
+    // let meshes = generateRandomLandmarks([-20, 20], [0, 20], [-20, 20], 30, scene);
 
     function animate() {
         requestAnimationFrame( animate );
 
         // calculate pointer position in normalized device coordinates
         // (-1 to +1) for both 
-        raycaster.setFromCamera( pointer, camera );
-
-        for (let i = 0; i < meshes.length; i++) {
-            let mesh = meshes[i];
-            mesh.rotation.x += .02;
-            mesh.rotation.y += .02;
-        }
-        
+        raycaster.setFromCamera( pointer, camera );        
         renderer.render( scene, camera );
+
+        propagationManager.updatePropagations();
+        sats.forEach(sat => sat.updateShapePosition())
     }
 
     window.addEventListener("pointermove", onPointerMove)
