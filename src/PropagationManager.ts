@@ -14,6 +14,7 @@ type satDisplayInfo = {
     "Description" : string
 }
 
+
 function constructInfoString(info : satDisplayInfo) {
     let str = ""
     for (let key of Object.keys(info)) {
@@ -23,6 +24,8 @@ function constructInfoString(info : satDisplayInfo) {
     }
     return str;
 }
+
+
 
 /**
  * Class for fetching data from a TLE API endpoint and propagating
@@ -36,11 +39,20 @@ export class PropagationManager {
         height: 0.370
     };
     url: string
-    satrecs : dict<Satellite.SatRec> = {};
-    propagations : dict<Satellite.EciVec3<number>> = {};
     infos : dict<satDisplayInfo> = {};
+    satrecs : dict<Satellite.SatRec> = {}
+    propagations : dict<Satellite.EciVec3<number>> = {}
+    old_timestamp : number
+    old_propagations : dict<Satellite.EciVec3<number>> = {}
+    next_propagations : dict<Satellite.EciVec3<number>> = {}
 
-
+    /**
+     * @param url - API endpoint to get TLEs, requires data in TLE format
+     */
+    constructor(url : string) {
+        this.url = url;
+        this.old_timestamp = 0
+    }
 
     makeInfo (meanMotion : number ) {
         let meanMotionRevPerDay = Math.floor((meanMotion * 24 * 60 / (Math.PI * 2)) * 100) / 100;
@@ -73,13 +85,6 @@ export class PropagationManager {
                 "Description" : "test description"
             }
         }
-    }
-
-    /**
-     * @param url - API endpoint to get TLEs, requires data in TLE format
-     */
-    constructor(url : string) {
-        this.url = url;
     }
 
     parse (data : string) {
@@ -143,11 +148,33 @@ export class PropagationManager {
      * { position : {x, y, z}, velocity : {x, y ,z} }
      */
     updatePropagations = () => {
-        for (let [key, value] of Object.entries(this.satrecs)) {
-            let prop = Satellite.propagate(this.satrecs[key], new Date()).position;
-            if (typeof prop != "boolean") this.propagations[key] = prop;
+        const curr_timestamp = new Date().getTime()
+        if (curr_timestamp > this.old_timestamp + 5000) {
+            console.log("longer thing...")
+            for (let [key, value] of Object.entries(this.satrecs)) {
+                let old_prop = Satellite.propagate(this.satrecs[key], new Date()).position;
+                if (typeof old_prop != "boolean") this.old_propagations[key] = old_prop;
+
+                let next_date = new Date()
+                next_date.setSeconds(next_date.getSeconds() + 5)
+                let next_prop = Satellite.propagate(this.satrecs[key], next_date).position
+                if (typeof next_prop != "boolean") this.next_propagations[key] = next_prop;
+            }
+            this.old_timestamp = curr_timestamp
+        } else {
+            // interpolate between propagations
+            for (let [key, value] of Object.entries(this.old_propagations)) {
+                const ratio = (curr_timestamp - this.old_timestamp) / 5000;
+                let interp_prop : Satellite.EciVec3<number> = {
+                    x : (this.old_propagations[key].x * (1 - ratio) 
+                        + this.next_propagations[key].x * ratio),
+                    y : (this.old_propagations[key].y * (1 - ratio) 
+                        + this.next_propagations[key].y * ratio) ,
+                    z : (this.old_propagations[key].z * (1 - ratio) 
+                        + this.next_propagations[key].z * ratio)
+                }
+                this.propagations[key] = interp_prop
+            }
         }
     }
-
-
 }
