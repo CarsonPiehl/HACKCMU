@@ -8,6 +8,22 @@ type dict<T> = {
     [key : string] : T;
 } 
 
+type satDisplayInfo = {
+    "Revolutions per Day" : string
+    "Orbit Regime" : string
+    "Description" : string
+}
+
+function constructInfoString(info : satDisplayInfo) {
+    let str = ""
+    for (let key of Object.keys(info)) {
+        //@ts-ignore
+        str += key + ": " + info[key];
+        str += "\n"
+    }
+    return str;
+}
+
 /**
  * Class for fetching data from a TLE API endpoint and propagating
  * General usage: construct a PropogationManager object, and use the
@@ -22,6 +38,42 @@ export class PropagationManager {
     url: string
     satrecs : dict<Satellite.SatRec> = {};
     propagations : dict<Satellite.EciVec3<number>> = {};
+    infos : dict<satDisplayInfo> = {};
+
+
+
+    makeInfo (meanMotion : number ) {
+        let meanMotionRevPerDay = Math.floor((meanMotion * 24 * 60 / (Math.PI * 2)) * 100) / 100;
+
+        if (11 < meanMotionRevPerDay) {
+            return {
+                "Revolutions per Day": String(meanMotionRevPerDay),
+                "Orbit Regime": "Low Earth Orbit",
+                "Description" : "test description"
+            }
+        }
+        if (1.1 < meanMotionRevPerDay) {
+            return {
+                "Revolutions per Day": String(meanMotionRevPerDay),
+                "Orbit Regime": "Medium Earth Orbit",
+                "Description" : "test description"
+            }
+        }
+        if (.9 < meanMotionRevPerDay) {
+            return {
+                "Revolutions per Day": String(meanMotionRevPerDay),
+                "Orbit Regime": "Geosynchronous Orbit",
+                "Description" : "test description"
+            }
+        }
+        else {
+            return {
+                "Revolutions per Day": String(meanMotionRevPerDay),
+                "Orbit Regime": "High Earth Orbit",
+                "Description" : "test description"
+            }
+        }
+    }
 
     /**
      * @param url - API endpoint to get TLEs, requires data in TLE format
@@ -34,6 +86,7 @@ export class PropagationManager {
         const lines = data.split('\n')
         let satrecs : dict<Satellite.SatRec> = {}  
         let propagations : dict<Satellite.EciVec3<number>> = {}
+        let infos : dict<satDisplayInfo> = {}
         console.log(data)
         
         for (let i = 0; i < lines.length - 1; i += 3) {
@@ -47,10 +100,12 @@ export class PropagationManager {
         for (let [key, value] of Object.entries(satrecs)) {
             let prop = Satellite.propagate(satrecs[key], new Date()).position;
             if (typeof prop != "boolean") propagations[key] = prop;
+            infos[key] = this.makeInfo(value.no);
         }
 
         this.satrecs = satrecs
         this.propagations = propagations
+        this.infos = infos
     }
 
 
@@ -75,7 +130,7 @@ export class PropagationManager {
         let keys = Object.keys(this.propagations);
         let satArr = Array(keys.length)
         for (let i = 0; i < keys.length; i++) {
-            satArr[i] = new Sat(keys[i], keys[i], "test desc", i, this)
+            satArr[i] = new Sat(keys[i], keys[i], "Orbit Regime: " + constructInfoString(this.infos[keys[i]]), i, this)
         }
         return satArr;
     }

@@ -130,9 +130,15 @@ export default function Three(setter : any) {
     ground.position.y = -2;
     scene.add(ground);
 
+    const moon = new THREE.Mesh(new THREE.SphereGeometry(11, 20, 20), new THREE.MeshBasicMaterial({ color: 0xc2c5cc }))
+    moon.position.x = 100
+    moon.position.y = 80
+    moon.position.z = 50
+    scene.add(moon);
+
     // Position and scale the grass blade instances randomly.
 
-    for ( let i=0 ; i<instanceNumber ; i++ ) {
+    for ( let i=0 ; i < instanceNumber ; i++ ) {
         dummy.position.set(
         ( Math.random() - 0.5 ) * 10,
         0,
@@ -164,9 +170,12 @@ export default function Three(setter : any) {
 
     //@ts-ignore
     let intersects = [];
+    let selected : any;
 
     function onClick (event : MouseEvent) {
         if (intersects.length < 1) {
+            //@ts-ignore
+            //if (selected) selected.unselectShape();
             setter({
                 "title": "",
                 "description": "",
@@ -176,12 +185,14 @@ export default function Three(setter : any) {
         }
         else {
             //@ts-ignore
-            console.log(parseInt(intersects[0].object.id - 1))
+            //if (selected) selected.unselectShape();
             //@ts-ignore
-            let sat = sats[intersects[0].object.id - 1];
+            selected = sats[parseInt(intersects[0].object.name)];
+            //@ts-ignore
+            selected.selectShape();
             setter({
-                "title": sat.title,
-                "description": sat.description,
+                "title": selected.title,
+                "description": selected.description,
                 "image": "",
                 "exists": true
             })
