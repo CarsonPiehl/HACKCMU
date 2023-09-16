@@ -1,6 +1,5 @@
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import * as Satellite from 'satellite.js';
-import * as THREE from 'three';
 import { Sat } from './Sat';
 import { TLEs } from './celestrakTLEs';
 
@@ -151,7 +150,7 @@ export class PropagationManager {
         const curr_timestamp = new Date().getTime()
         if (curr_timestamp > this.old_timestamp + 5000) {
             console.log("longer thing...")
-            for (let [key, value] of Object.entries(this.satrecs)) {
+            for (let key of Object.keys(this.satrecs)) {
                 let old_prop = Satellite.propagate(this.satrecs[key], new Date()).position;
                 if (typeof old_prop != "boolean") this.old_propagations[key] = old_prop;
 
@@ -163,7 +162,7 @@ export class PropagationManager {
             this.old_timestamp = curr_timestamp
         } else {
             // interpolate between propagations
-            for (let [key, value] of Object.entries(this.old_propagations)) {
+            for (let key of Object.keys(this.old_propagations)) {
                 const ratio = (curr_timestamp - this.old_timestamp) / 5000;
                 let interp_prop : Satellite.EciVec3<number> = {
                     x : (this.old_propagations[key].x * (1 - ratio) 

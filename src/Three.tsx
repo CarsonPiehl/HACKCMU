@@ -1,12 +1,8 @@
-import {useState} from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { DragControls } from 'three/examples/jsm/controls/DragControls.js';
 import { PropagationManager } from './PropagationManager';
-import { Infobox, InfoboxProps } from './Components/Infobox';
-import { render } from 'react-dom';
-import panUrl from './assets/cmuPan.jpg'
 
+/*
 function randomColor () {
     return new THREE.Color(Math.random(), Math.random(), Math.random());
 }
@@ -35,7 +31,7 @@ function generateRandomLandmarks(xBounds : Array<number>, yBounds : Array<number
         if (scene) scene.add(meshArr[i]);
     }
     return meshArr;
-}
+}*/
 
 export default function Three(setter : any) {
     const scene = new THREE.Scene();
@@ -44,7 +40,7 @@ export default function Three(setter : any) {
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
 
-    const clock = new THREE.Clock();
+    //const clock = new THREE.Clock();
 
     function onPointerMove (event : MouseEvent) {
         pointer.x = ((event.clientX / window.innerWidth) * 2) - 1;
@@ -173,6 +169,10 @@ export default function Three(setter : any) {
     let selected : any;
 
     function onClick (event : MouseEvent) {
+        if (0 != 0) {
+            console.log(event.x);
+        } 
+
         if (intersects.length < 1) {
             //@ts-ignore
             //if (selected) selected.unselectShape();
