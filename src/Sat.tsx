@@ -26,7 +26,8 @@ export class Sat {
     }
 
     getECIVector = () => {
-        return this.propagationManager.propagations[this.propagationManagerKey];
+        let eci = this.propagationManager.propagations[this.propagationManagerKey];
+        return eci;
     }
 
     makeShape = () => {
@@ -64,7 +65,7 @@ export class Sat {
     }
 
     updateShapePosition () {
-        let newVec = this.getVector(DISTANCE_FROM_OBSERVER)
+        let newVec = this.getVector(DISTANCE_FROM_OBSERVER);
         this.shape.position.x = newVec.x;
         this.shape.position.y = newVec.y;
         this.shape.position.z = newVec.z;
